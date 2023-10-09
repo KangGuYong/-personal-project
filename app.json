@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Test",
+    "slug": "Test",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBXSxMFjzikCYRuUJ_7DvFxAvoib0INVq8"
+        }
+      }
+    }
+  },
+  "name": "Test"
+}
