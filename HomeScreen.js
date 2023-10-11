@@ -1,18 +1,30 @@
+// HomeScreen.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Button, Modal, TextInput } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker} from 'react-native-maps';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { GOOGLE_MAPS_API_KEY } from './config';
 import handlePlaceSelect from './handlePlaceSelect';
+import { loadMarkers } from './loadMarkers'; 
+// Firebase import statements for deleting a marker.
+import { app as firebaseApp}  from './firebaseConfig'
+import{ getFirestore ,doc ,deleteDoc}from "firebase/firestore"
+
+const db=getFirestore(firebaseApp);
 
 const HomeScreen = () => {
-  const [markersPositions, setMarkersPositions] = useState([]); // 마커의 위치를 저장하는 상태 변수
-  const [showSearchBar, setShowSearchBar] = useState(false); // 검색 바 표시 여부를 저장하는 상태 변수
-  const [planModalVisible, setPlanModalVisible] = useState(false); // 모달 창 표시 여부를 저장하는 상태 변수
-  const [travelPlans, setTravelPlans] = useState({}); // 모임의 설명 저장하는 상태 변수
-  const [currentMarkerId, setCurrentMarkerId] = useState(null); // 현재 선택된 마커의 ID를 저장하는 상태 변수
+  const [markersPositions, setMarkersPositions] = useState([]); 
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [planModalVisible, setPlanModalVisible] = useState(false);
+  const [travelPlans, setTravelPlans] = useState({});
+  const [currentMarkerId, setCurrentMarkerId] = useState(null);
 
-  return (
+ useEffect(() => {
+    loadMarkers(setMarkersPositions);
+ }, []);
+
+ return (
     <View style={{ flex: 1 }}>
       <Button title="장소 검색" onPress={() => setShowSearchBar(true)} />
 
@@ -20,7 +32,8 @@ const HomeScreen = () => {
       {showSearchBar && (
         <GooglePlacesAutocomplete
           placeholder="검색"
-          onPress={(data) => handlePlaceSelect(data, setMarkersPositions,
+          onPress={(data) => handlePlaceSelect(data,
+            setMarkersPositions,
             setShowSearchBar)}
           query={{
             key: GOOGLE_MAPS_API_KEY,
@@ -42,25 +55,25 @@ const HomeScreen = () => {
         showsMyLocationButton={true}
         showsUserLocation={true}
       >
-        {/* 마커 표시 */}
-        {markersPositions.map((markerPosition) => (
-          <Marker
-            key={markerPosition.id}
-            coordinate={markerPosition}
-            onPress={() => {
-              setCurrentMarkerId(markerPosition.id);
-              setPlanModalVisible(true);
-            }}
-          />
-        ))}
-       </MapView>
+       {/* 마커 표시 */}
+       {markersPositions.map((markerPosition) => (
+         <Marker
+           key={markerPosition.id}
+           coordinate={markerPosition}
+           onPress={() => {
+             setCurrentMarkerId(markerPosition.id);
+             setPlanModalVisible(true);
+           }}
+         />
+       ))}
+     </MapView>
 
-       {/* 모달 : 마커에 내용 입력 */}
-       <Modal animationType="slide" transparent={true} visible={planModalVisible}>
-         <View style={{ flex:1 , justifyContent:'center', alignItems:'center'}}>
-           <View style={{ backgroundColor:'white', padding:20 , borderRadius :10}}>
-             {/* 여행 계획 입력란 */}
-             <TextInput 
+     {/* 모달 : 마커에 내용 입력 */}
+     <Modal animationType="slide" transparent={true} visible={planModalVisible}>
+       <View style={{ flex:1 , justifyContent:'center', alignItems:'center'}}>
+         <View style={{ backgroundColor:'white', padding:20 , borderRadius :10}}>
+           {/* 여행 계획 입력란 */}
+           <TextInput 
                placeholder='여행 계획을 입력하세요...'
                value= {travelPlans[currentMarkerId] || ''}
                onChangeText={(text) =>
@@ -71,29 +84,29 @@ const HomeScreen = () => {
                }
              />
 
-             {/* 계획 저장 버튼 */}
-             <Button title='계획 저장' onPress={() =>setPlanModalVisible(false)} />
+           {/* 계획 저장 버튼 */}
+           <Button title='계획 저장' onPress={() =>setPlanModalVisible(false)} />
 
-             {/* 마커 삭제 버튼 */}
-             <Button 
+           {/* 마커 삭제 버튼 */}
+            <Button 
                title='마커 삭제'
-               onPress={()=> {
+               onPress={async ()=> {
+                 // 마커를 상태에서 삭제합니다.
                  const newMarkers= markersPositions.filter(
                    (marker)=> marker.id !== currentMarkerId);
 
                  setMarkersPositions(newMarkers);
 
-                 if(newMarkers.length<2){
-                   setRouteCoordinates([]);
-                 }
+                // Firebase에서 해당 문서를 삭제합니다.
+                await deleteDoc(doc(db,'markers',currentMarkerId));
 
                 setPlanModalVisible(false);
               }}/>
-           </View>
          </View>
-       </Modal>
-     </View>
-   );
- };
+       </View>
+     </Modal>
+   </View>
+ );
+};
 
- export default HomeScreen;
+export default HomeScreen;
