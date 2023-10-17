@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text, FlatList } from 'react-native';
-import { Card } from 'react-native-paper';
-import MapView, { Marker, Polyline } from 'react-native-maps'; // Polyline 추가
+import { View, FlatList, Text } from 'react-native';
+import { Card, Title, Paragraph } from 'react-native-paper'; // Title, Paragraph 추가
+import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const TravelPlanScreen = ({ route }) => {
   const { markersPositions } = route.params;
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 3 }}>
       <MapView
         provider="google"
         style={{ flex: 1 }}
@@ -19,9 +19,16 @@ const TravelPlanScreen = ({ route }) => {
         }}
       >
         {/* 마커 표시 */}
-        {markersPositions.map((markerPosition) => (
-          <Marker key={markerPosition.id} coordinate={markerPosition} />
-        ))}
+        {markersPositions.map((markerPosition,index) => (
+           <Marker 
+             key={markerPosition.id} 
+             coordinate={markerPosition}
+           >
+             <View style={{ backgroundColor: "red", padding: 10, borderRadius: 20 }}>
+               <Text style={{ color: "white" }}>{index + 1}</Text>
+             </View>
+           </Marker>
+         ))}
 
         {/* 경로 표시 */}
         <Polyline
@@ -38,16 +45,37 @@ const TravelPlanScreen = ({ route }) => {
         data={markersPositions}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Card style={{ margin: 10 }}>
+          <Card style={{ marginVertical :1 , marginHorizontal :1}}>
             <Card.Content>
-              <Text>장소: ({item.latitude}, {item.longitude})</Text>
-              <Text>계획: {item.travelPlan}</Text>
+              {/* Title과 Paragraph 컴포넌트 사용 */}
+              <Title>장소</Title>  
+              <Paragraph>({item.latitude}, {item.longitude})</Paragraph> 
+              {/* 계획에 대한 제목 추가 */}
+              <Title>계획</Title>  
+              {/* 계획에 대한 내용 추가 */}
+              <Paragraph>{item.travelPlan}</Paragraph>
             </Card.Content>
+            
+            {/* Card.Actions 추가 - 필요에 따라 버튼 등 다른 요소를 넣을 수 있습니다.*/}
+            {/*<Card.Actions>
+               ... 여기에 액션 아이템들(예 : 버튼)을 넣으세요.
+            </Card.Actions>*/}
+            
           </Card>
-        )}
-      />
-    </View>
-  );
+
+          
+          
+          
+          
+         
+         
+         
+         
+         
+           
+       )}
+     />
+   </View>);
 };
 
 export default TravelPlanScreen;

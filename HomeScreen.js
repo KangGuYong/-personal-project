@@ -1,6 +1,6 @@
 // HomeScreen.js
 import React, { useState, useEffect } from 'react';
-import { View, Dimensions } from 'react-native';
+import { View, Dimensions,Text } from 'react-native';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import axios from 'axios';
 import handlePlaceSelect from './handlePlaceSelect';
@@ -74,18 +74,18 @@ const HomeScreen = ({ navigation }) => {
       <PaperButton mode="contained" icon="magnify" onPress={() => setShowSearchBar(true)} style={{ margin: 10 }}>장소 검색</PaperButton>
       {/* 장소 검색 바 */}
       {showSearchBar && (
-        <GooglePlacesAutocomplete
-        placeholder="검색"
-        onPress={(data) => {
-          handlePlaceSelect(data, setMarkersPositions,setShowSearchBar);
-          
-        }}
-        query={{
-          key: GOOGLE_MAPS_API_KEY,
-          language: 'ko',
-        }}
-      />
-      )}
+  <GooglePlacesAutocomplete
+    placeholder="검색"
+    onPress={(data) => {
+      handlePlaceSelect(data, setMarkersPositions, setShowSearchBar, markersPositions.length); // 현재 마커 위치 배열의 길이 추가
+
+    }}
+    query={{
+      key: GOOGLE_MAPS_API_KEY,
+      language: 'ko',
+    }}
+  />
+)}
 
       {/* 여행 계획 보기 버튼 */}
       <PaperButton mode="contained" icon="book-open-page-variant" onPress={() => navigation.navigate('Travel Plan', { markersPositions })} style={{ margin: 10 }}>여행 계획 보기</PaperButton>
@@ -104,7 +104,7 @@ const HomeScreen = ({ navigation }) => {
         showsUserLocation={true}
       >
         {/* 마커 표시 */}
-        {markersPositions.map((markerPosition) => (
+        {markersPositions.map((markerPosition, index) => (
           <Marker
             key={markerPosition.id}
             coordinate={markerPosition}
@@ -114,7 +114,11 @@ const HomeScreen = ({ navigation }) => {
               setIsModalVisible(true);
               setIsEditable(false); // '수정' 모드 해제
             }}
-          />
+          >
+            <View style={{ backgroundColor: "red", padding: 10, borderRadius: 20 }}>
+              <Text style={{ color: "white" }}>{index + 1}</Text>
+            </View>
+          </Marker>
         ))}
 
         {/* 경로 표시 */}
