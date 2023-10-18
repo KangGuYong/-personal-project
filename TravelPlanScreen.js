@@ -4,60 +4,58 @@ import { Card } from 'react-native-paper';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const TravelPlanScreen = ({ route }) => {
-  const { markersPositions = [] } = route.params;
+  const { markersPositions = [] } = route.params || {};
+
+  // 첫 번째 마커의 위치 또는 기본 위치를 설정합니다.
+  const initialRegion = markersPositions[0]
+    ? {
+        latitude: markersPositions[0].latitude,
+        longitude: markersPositions[0].longitude,
+        latitudeDelta: 0.09,
+        longitudeDelta: 0.04,
+      }
+    : {
+        latitude: 37.5665,
+        longitude: 126.9780,
+        latitudeDelta: 0.09,
+        longitudeDelta: 0.04,
+      };
 
   return (
     <View style={styles.container}>
-      <MapView
-        provider="google"
-        style={styles.map}
-        initialRegion={{
-          latitude: markersPositions[0].latitude,
-          longitude: markersPositions[0].longitude,
-          latitudeDelta: 0.09,
-          longitudeDelta: 0.04
-        }}
-      >
-        {/* 마커 표시 */}
+      <MapView provider="google" style={styles.map} initialRegion={initialRegion}>
+        {/* 마커 및 경로를 표시합니다. */}
         {markersPositions.map((markerPosition, index) => (
-          <Marker
-            key={markerPosition.id}
-            coordinate={markerPosition}
-          >
+          <Marker key={markerPosition.id} coordinate={markerPosition}>
             <View style={styles.markerContainer}>
               <Text style={styles.markerText}>{index + 1}</Text>
             </View>
           </Marker>
         ))}
 
-        {/* 경로 표시 */}
-        <Polyline
-          coordinates={markersPositions.map((markerPosition) => ({
-            latitude: markerPosition.latitude,
-            longitude: markerPosition.longitude
-          }))}
-          strokeColor="#000"
-          strokeWidth={3}
-        />
+        <Polyline coordinates={markersPositions} strokeColor="#000" strokeWidth={3} />
       </MapView>
 
       <FlatList
         data={markersPositions}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         style={styles.list}
         renderItem={({ item }) => (
           <Card style={styles.cardContainer}>
             <Card.Content>
-              {/* Title과 Paragraph 대신 Text 컴포넌트 사용 */}
-              <Text style={styles.title}>장소 : {item.placeName} </Text>
-              {/* 계획에 대한 제목 추가 */}
+              <Text style={styles.title}>장소 : {item.placeName}</Text>
               <Text style={styles.title}>계획 : {item.travelPlan}</Text>
             </Card.Content>
           </Card>
         )}
       />
-    </View>);
+    </View>
+  );
 };
+
+
+
+
 
 // 별도의 스타일 객체 정의
 const styles = StyleSheet.create({

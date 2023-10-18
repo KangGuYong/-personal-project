@@ -25,15 +25,21 @@ export const loadMarkers = async (setMarkersPositions) => {
   }
 };
 
-export const saveTravelPlanToFirebaseDB = async (markerId, travelPlan) => {
+export const saveTravelPlanToFirebaseDB = async (markerId, travelPlan, setMarkersPositions, markersPositions) => {
   try {
     await updateDoc(doc(db, "markers", markerId), {
       travelPlan: travelPlan
     });
     
-   console.log("여행 계획이 저장되었습니다.");
+    // 마커 위치 배열 업데이트
+    const updatedMarkersPositions = markersPositions.map(marker =>
+      marker.id === markerId ? { ...marker, travelPlan: travelPlan } : marker
+    );
+    setMarkersPositions(updatedMarkersPositions);
+    
+    console.log("여행 계획이 저장되었습니다.");
   } catch (error) {
-   console.error("Error updating document: ", error);
+    console.error("Error updating document: ", error);
   }
 }
 
