@@ -86,7 +86,7 @@ const HomeScreen = ({ navigation }) => {
           }}
         />
       )}
-      
+
 
       {/* 지도 */}
       <MapView
@@ -110,7 +110,7 @@ const HomeScreen = ({ navigation }) => {
               setSelectedMarkerId(markerPosition.id);
               setTravelPlanInputValue(markerPosition.travelPlan); // 마커 클릭 시 해당 마커의 여행 계획을 가져옵니다.
               setIsModalVisible(true);
-              setIsEditable(false); // '수정' 모드 해제
+              setIsEditable(markerPosition.travelPlan === ""); // '수정' 모드를 travelPlan이 비어있을 때만 켜도록 설정
             }}
           >
             <View style={{ backgroundColor: "red", padding: 10, borderRadius: 20 }}>
@@ -136,6 +136,7 @@ const HomeScreen = ({ navigation }) => {
               value={travelPlanInputValue}
               onChangeText={(text) => setTravelPlanInputValue(text)}
               editable={isEditable}
+              keyboardType="email-address" // 이 부분을 추가
             />
           </Dialog.Content>
           <Dialog.Actions>

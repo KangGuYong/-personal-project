@@ -6,7 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // Import the separated components
 import HomeScreen from './HomeScreen'; // Update the file path if necessary
 import TravelPlanScreen from './TravelPlanScreen';
-
+import ChecklistScreen from './ChecklistScreen';
 // Import Provider
 import { Provider as PaperProvider } from 'react-native-paper';
 
@@ -22,6 +22,7 @@ const App = () => (
         <Tab.Screen name="Travel Plan">
           {(props) => <TravelPlanScreen {...props} />}
         </Tab.Screen>
+        <Tab.Screen name="Checklist" component={ChecklistScreen}/>
       </Tab.Navigator>
     </NavigationContainer>
   </PaperProvider>
