@@ -1,16 +1,16 @@
 import React from 'react';
-import { View, FlatList, Text } from 'react-native';
-import { Card, Title, Paragraph } from 'react-native-paper'; // Title, Paragraph 추가
+import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { Card } from 'react-native-paper';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 
 const TravelPlanScreen = ({ route }) => {
-  const { markersPositions } = route.params;
+  const { markersPositions = [] } = route.params;
 
   return (
-    <View style={{ flex: 3 }}>
+    <View style={styles.container}>
       <MapView
         provider="google"
-        style={{ flex: 1 }}
+        style={styles.map}
         initialRegion={{
           latitude: markersPositions[0].latitude,
           longitude: markersPositions[0].longitude,
@@ -19,16 +19,16 @@ const TravelPlanScreen = ({ route }) => {
         }}
       >
         {/* 마커 표시 */}
-        {markersPositions.map((markerPosition,index) => (
-           <Marker 
-             key={markerPosition.id} 
-             coordinate={markerPosition}
-           >
-             <View style={{ backgroundColor: "red", padding: 10, borderRadius: 20 }}>
-               <Text style={{ color: "white" }}>{index + 1}</Text>
-             </View>
-           </Marker>
-         ))}
+        {markersPositions.map((markerPosition, index) => (
+          <Marker
+            key={markerPosition.id}
+            coordinate={markerPosition}
+          >
+            <View style={styles.markerContainer}>
+              <Text style={styles.markerText}>{index + 1}</Text>
+            </View>
+          </Marker>
+        ))}
 
         {/* 경로 표시 */}
         <Polyline
@@ -44,38 +44,54 @@ const TravelPlanScreen = ({ route }) => {
       <FlatList
         data={markersPositions}
         keyExtractor={(item) => item.id}
+        style={styles.list}
         renderItem={({ item }) => (
-          <Card style={{ marginVertical :1 , marginHorizontal :1}}>
+          <Card style={styles.cardContainer}>
             <Card.Content>
-              {/* Title과 Paragraph 컴포넌트 사용 */}
-              <Title>장소</Title>  
-              <Paragraph>({item.latitude}, {item.longitude})</Paragraph> 
+              {/* Title과 Paragraph 대신 Text 컴포넌트 사용 */}
+              <Text style={styles.title}>장소 : {item.placeName} </Text>
               {/* 계획에 대한 제목 추가 */}
-              <Title>계획</Title>  
-              {/* 계획에 대한 내용 추가 */}
-              <Paragraph>{item.travelPlan}</Paragraph>
+              <Text style={styles.title}>계획 : {item.travelPlan}</Text>
             </Card.Content>
-            
-            {/* Card.Actions 추가 - 필요에 따라 버튼 등 다른 요소를 넣을 수 있습니다.*/}
-            {/*<Card.Actions>
-               ... 여기에 액션 아이템들(예 : 버튼)을 넣으세요.
-            </Card.Actions>*/}
-            
           </Card>
-
-          
-          
-          
-          
-         
-         
-         
-         
-         
-           
-       )}
-     />
-   </View>);
+        )}
+      />
+    </View>);
 };
+
+// 별도의 스타일 객체 정의
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  map: {
+    flex: 0.5,
+  },
+  list: {
+    flex: 0.5,
+  },
+  markerText: {
+    color: "white",
+  },
+  markerContainer: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 20,
+  },
+  cardContainer: {
+    marginVertical: 10,
+    marginHorizontal: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    backgroundColor: 'white', // 배경색을 흰색으로 설정
+    borderColor: 'black', // 테두리 색을 검정색으로 설정
+    borderWidth: 1,
+  },
+  paragraph: { //추가됨  
+    fontSize: 16,// 추가됨 
+    color: 'black',// 추가됨 
+  }
+
+});
 
 export default TravelPlanScreen;

@@ -26,6 +26,8 @@ const handlePlaceSelect = async (data, setMarkersPositions, setShowSearchBar, cu
        let newMarker = {
         latitude: position.lat,
         longitude: position.lng,
+        placeName: data.description,  // 여기에 장소 이름 추가
+        travelPlan: ''
        };
 
       // Firestore에 새로운 마커 추가하고 id 받아오기
