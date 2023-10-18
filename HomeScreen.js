@@ -86,9 +86,7 @@ const HomeScreen = ({ navigation }) => {
           }}
         />
       )}
-
-      {/* 여행 계획 보기 버튼 */}
-      <PaperButton mode="contained" icon="book-open-page-variant" onPress={() => navigation.navigate('Travel Plan', { markersPositions })} style={{ margin: 10 }}>여행 계획 보기</PaperButton>
+      
 
       {/* 지도 */}
       <MapView

@@ -16,8 +16,12 @@ const App = () => (
   <PaperProvider>
     <NavigationContainer>
       <Tab.Navigator initialRouteName="Home">
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Travel Plan" component={TravelPlanScreen} />
+        <Tab.Screen name="Home">
+          {(props) => <HomeScreen {...props} />}
+        </Tab.Screen>
+        <Tab.Screen name="Travel Plan">
+          {(props) => <TravelPlanScreen {...props} />}
+        </Tab.Screen>
       </Tab.Navigator>
     </NavigationContainer>
   </PaperProvider>
