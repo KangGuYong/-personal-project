@@ -1,51 +1,87 @@
-// ChecklistScreen.js
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Button, TextInput, Text, Checkbox, Provider as PaperProvider } from 'react-native-paper';
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+
+const db = getFirestore();
 
 const ChecklistScreen = () => {
-  const [item, setItem] = useState(''); // 입력 필드에 입력된 항목
-  const [items, setItems] = useState([]); // 체크리스트 항목들
+  const [item, setItem] = useState('');
+  const [items, setItems] = useState([]);
 
-  // 새 항목 추가
-  const addItem = () => {
+  useEffect(() => {
+    loadItemsFromFirebase();
+  }, []);
+
+  const addItem = async () => {
     if (item.trim() !== '') {
-      setItems([...items, item]);
+      const newItem = { text: item, isCompleted: false };
+      setItems([...items, newItem]);
       setItem('');
+
+      const checklistRef = collection(db, 'checklists');
+      await addDoc(checklistRef, newItem);
     }
   };
 
-  // 항목 삭제
-  const removeItem = (index) => {
-    const newItems = [...items];
-    newItems.splice(index, 1);
+  const toggleCompletion = async (id) => {
+    const newItems = items.map(i => 
+      i.id === id ? { ...i, isCompleted: !i.isCompleted } : i
+    );
+    setItems(newItems);
+
+    const checklistRef = doc(db, 'checklists', id);
+    const itemToUpdate = newItems.find(i => i.id === id);
+    await updateDoc(checklistRef, { isCompleted: itemToUpdate.isCompleted });
+  };
+
+  const deleteItem = async (id) => {
+    const checklistRef = doc(db, 'checklists', id);
+    await deleteDoc(checklistRef);
+
+    const newItems = items.filter(i => i.id !== id);
     setItems(newItems);
   };
 
+  const loadItemsFromFirebase = async () => {
+    const q = collection(db, 'checklists');
+    const querySnapshot = await getDocs(q);
+    const loadedItems = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+    setItems(loadedItems);
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>준비물 체크리스트</Text>
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="새 항목 추가"
-          onChangeText={(text) => setItem(text)}
-          value={item}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={addItem}>
-          <Text style={styles.buttonText}>추가</Text>
-        </TouchableOpacity>
-      </View>
-      <ScrollView style={styles.listContainer}>
-        {items.map((item, index) => (
-          <View key={index} style={styles.listItem}>
-            <Text style={styles.itemText}>{item}</Text>
-            <TouchableOpacity onPress={() => removeItem(index)}>
-              <Text style={styles.deleteButton}>삭제</Text>
-            </TouchableOpacity>
+    <PaperProvider>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Checklist</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Add new item"
+            onChangeText={(text) => setItem(text)}
+            value={item}
+          />
+          <View style={styles.buttonContainer}>
+            <Button mode="contained" onPress={addItem}>Add</Button>
           </View>
-        ))}
-      </ScrollView>
-    </View>
+        </View>
+        <ScrollView style={styles.listContainer}>
+          {items.map((item) => (
+            <View key={item.id} style={styles.listItem}>
+              <Checkbox
+                status={item.isCompleted ? 'checked' : 'unchecked'}
+                onPress={() => toggleCompletion(item.id)}
+                style={styles.checkbox}
+              />
+              <Text style={styles.itemText}>{item.text}</Text>
+              <TouchableOpacity onPress={() => deleteItem(item.id)}>
+                <Text style={styles.deleteButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    </PaperProvider>
   );
 };
 
@@ -65,42 +101,31 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
     marginRight: 8,
   },
-  addButton: {
-    backgroundColor: 'blue',
-    padding: 8,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  buttonContainer: {
+    alignSelf: 'center',
   },
   listContainer: {
     flex: 1,
   },
   listItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 4,
-    padding: 8,
     marginBottom: 8,
   },
   itemText: {
     flex: 1,
     fontSize: 16,
   },
-  deleteButton: {
+  checkbox: {
+    borderWidth: 2,
+    borderColor: 'red',
+    padding: 2,
+    marginRight: 8,
+  },
+  deleteButtonText: {
     color: 'red',
-    fontWeight: 'bold',
   },
 });
 
