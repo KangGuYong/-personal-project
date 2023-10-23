@@ -26,39 +26,57 @@ const ChecklistScreen = () => {
   const addItem = async () => {
     if (item.trim() !== '') {
       const newItem = { text: item, isCompleted: false };
-      newItem.id = Math.random().toString(36).substr(2, 9);
-
-      const checklistRef = collection(db, 'checklists');
-      await addDoc(checklistRef, newItem);
-      setItems([...items, newItem]);
-      setItem('');
+  
+      try {
+        const checklistRef = collection(db, 'checklists');
+        const docRef = await addDoc(checklistRef, newItem);
+        
+        // Firebase가 생성한 고유 ID를 가져와서 아이템에 할당합니다.
+        newItem.id = docRef.id;
+        
+        setItems([...items, newItem]);
+        setItem('');
+      } catch (error) {
+        console.error('문서를 추가하는 동안 오류가 발생했습니다.', error);
+      }
     }
   };
 
   const toggleCompletion = async (id) => {
-    const newItems = items.map((i) =>
-      i.id === id ? { ...i, isCompleted: !i.isCompleted } : i
-    );
-    setItems(newItems);
-
     const checklistRef = doc(db, 'checklists', id);
-    const itemToUpdate = newItems.find((i) => i.id === id);
-    await updateDoc(checklistRef, { isCompleted: itemToUpdate.isCompleted });
+    
+    try {
+      const itemSnapshot = await getDoc(checklistRef);
+      
+      if (itemSnapshot.exists()) {
+        const itemToUpdate = items.find((i) => i.id === id);
+        const updatedItem = { ...itemToUpdate, isCompleted: !itemToUpdate.isCompleted };
+        await updateDoc(checklistRef, updatedItem);
+        setItems((prevItems) =>
+          prevItems.map((item) =>
+            item.id === id ? updatedItem : item
+          )
+        );
+      } else {
+        console.error(`문서가 존재하지 않습니다. ID: ${id}`);
+      }
+    } catch (error) {
+      console.error('문서를 가져오는 동안 오류가 발생했습니다.', error);
+    }
   };
 
   const deleteItem = async (id) => {
     const checklistRef = doc(db, 'checklists', id);
-    const itemSnapshot = await getDoc(checklistRef); // 추가
-
-    if (itemSnapshot.exists()) { // 추가
+  
+    try {
       await deleteDoc(checklistRef);
-    } else {
-      console.error(`문서가 존재하지 않습니다. ID: ${id}`);
+      const newItems = items.filter((i) => i.id !== id);
+      setItems(newItems);
+    } catch (error) {
+      console.error('문서를 삭제하는 동안 오류가 발생했습니다.', error);
     }
-
-    const newItems = items.filter((i) => i.id !== id);
-    setItems(newItems);
   };
+  
 
   const loadItemsFromFirebase = async () => {
     const q = collection(db, 'checklists');
