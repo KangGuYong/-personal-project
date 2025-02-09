@@ -4,7 +4,7 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import axios from 'axios';
 import handlePlaceSelect from './handlePlaceSelect'; // 장소 선택 핸들러
 import { loadMarkers, saveTravelPlanToFirebaseDB, deleteMarkerFromFirebaseDB } from './loadMarkers'; // Firestore 데이터 로드 및 관리 함수
-const YOUR_GRAPHHOPPER_API_KEY = "ff60806d-9547-4493-8466-15d7a8063998";  // GraphHopper API 키 입력
+const YOUR_GRAPHHOPPER_API_KEY = "";  // GraphHopper API 키 입력
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { GOOGLE_MAPS_API_KEY } from './config';
 
